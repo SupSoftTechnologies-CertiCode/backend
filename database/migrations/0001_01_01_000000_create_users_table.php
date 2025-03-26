@@ -29,13 +29,13 @@ return new class extends Migration
         Schema::create('users_profile', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('users_id');
-            $table->string('first_name', 255);
-            $table->string('last_name', 255);
+            $table->string('first_name', 255)->nullable();
+            $table->string('last_name', 255)->nullable();
             $table->string('middle_name', 255)->nullable();
-            $table->integer('age');
-            $table->string('gender', 50);
-            $table->string('address', 255);
-            $table->string('phone', 11);
+            $table->integer('age')->nullable();
+            $table->string('gender', 50)->nullable();
+            $table->string('address', 255)->nullable();
+            $table->string('phone', 11)->nullable();
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
