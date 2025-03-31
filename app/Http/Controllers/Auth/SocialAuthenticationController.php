@@ -33,29 +33,25 @@ class SocialAuthenticationController extends Controller
             ]);
     
             // Ensure user profile exists
-            $userProfile = UserProfile::firstOrCreate([
+            UserProfile::firstOrCreate([
                 'users_id' => $user->id,
             ]);
-    
-            // Load the profile into the user object
-            $user->load('userProfile');
     
             // Generate JWT token
             $token = JWTAuth::fromUser($user);
     
-            // Redirect to frontend with token and user data
-            $redirectUrl = env('FRONTEND_URL') . "/social-auth-handler?token=" . $token . "&user=" . urlencode(json_encode($user));
+            // Redirect to frontend with token
+            $redirectUrl = env('FRONTEND_URL') . "/social-auth-handler?token=" . $token;
     
             return redirect($redirectUrl);
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Authentication failed',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage() // Optional: Include for debugging
             ], 500);
         }
     }
-    
     
 
 }
