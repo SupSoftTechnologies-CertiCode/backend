@@ -22,7 +22,7 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request)
     {
-       
+        
         $request->validate([
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -68,4 +68,45 @@ class RegisteredUserController extends Controller
         }
        
     }
+    public function update(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Validate request data
+        $validatedData = $request->validate([
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'age' => 'nullable|integer|min:0|max:255',
+            'gender' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|min:11|max:11',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Update or create user profile
+            $userProfile = UserProfile::updateOrCreate(
+                ['users_id' => $user->id],  // Find by user ID
+                $validatedData             // Update fields
+            );
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Profile updated successfully',
+                'profile' => $userProfile
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Error updating profile', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
+
 }
