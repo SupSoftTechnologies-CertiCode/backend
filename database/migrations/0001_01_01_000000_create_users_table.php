@@ -36,6 +36,13 @@ return new class extends Migration
             $table->string('gender', 50);
             $table->string('address', 255);
             $table->string('phone', 11);
+            $table->string('bio', 255)->nullable();
+            $table->string('country', 255)->nullable();
+            $table->string('province', 255)->nullable();
+            $table->string('facebook', 255)->nullable();
+            $table->string('x', 255)->nullable();
+            $table->string('linkedin', 255)->nullable();
+            $table->string('instagram', 255)->nullable();
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });

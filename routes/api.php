@@ -13,6 +13,7 @@ use App\Http\Controllers\GuestController;
 use App\Http\Controllers\CertificateTemplateController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 use App\Http\Middleware\JwtMiddleware;
 use Illuminate\Support\Facades\Cache;
@@ -22,6 +23,9 @@ Route::prefix('auth')->middleware([JwtMiddleware::class])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::get('me', [AuthController::class, 'me']);
+
+    Route::put('update-profile', [RegisteredUserController::class, 'update']);
+
 });
 
 Route::get('seminar/{seminar}', [SeminarController::class, 'show']);

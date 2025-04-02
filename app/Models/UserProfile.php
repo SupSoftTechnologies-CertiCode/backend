@@ -17,6 +17,13 @@ class UserProfile extends Model
         'gender',
         'address',
         'phone',
+        'bio',
+        'country',
+        'province',
+        'facebook',
+        'x',
+        'linkedin',
+        'instagram'
     ];
 
     public function users() 
