@@ -99,8 +99,16 @@ class TransactionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Transaction $transaction)
+    public function destroy($id)
     {
-        //
+        $transaction = Transaction::find($id);
+
+        if (!$transaction) {
+            return response()->json(['message' => 'Transaction not found'], 404);
+        }
+
+        $transaction->delete();
+
+        return response()->json(['message' => 'Transaction deleted successfully'], 200);
     }
 }

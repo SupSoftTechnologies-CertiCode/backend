@@ -78,7 +78,7 @@ Route::post('/templates', [CertificateTemplateController::class, 'store']);
 Route::post('/templates/{id}', [CertificateTemplateController::class, 'update']);
 Route::delete('/templates/{id}', [CertificateTemplateController::class, 'destroy']);
 
-
+Route::delete('/transactions/{id}/delete', [TransactionController::class, 'destroy']);
 Route::put('/transactions/{id}/update', [TransactionController::class, 'update']);
 Route::get('/transactions', [TransactionController::class, 'index']);
 Route::post('/create-transaction', [TransactionController::class, 'store']);
