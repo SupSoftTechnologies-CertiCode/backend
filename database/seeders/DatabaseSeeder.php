@@ -176,19 +176,23 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'admin@gmail.com',
             'role' => 'admin',
-            'password' => Hash::make('admin123'),
-            'email_verified_at' => now()
-        ]);
-
-        UserProfile::create([
-            'users_id' => 1,
             'first_name' => "",
             'last_name' => "",
             'middle_name' => null,
             'age' => 0,
             'gender' => "",
             'address' => "",
+            'country' => "",
+            'province' => "",
+            'bio' => "",
             'phone' => "",
+            'password' => Hash::make('admin123'),
+            'email_verified_at' => now()
+        ]);
+
+        UserProfile::create([
+            'users_id' => 1,
+            
             'created_at' => now(),
             'updated_at' => now()
         ]);

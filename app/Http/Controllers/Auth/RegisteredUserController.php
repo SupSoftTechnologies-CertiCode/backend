@@ -42,10 +42,6 @@ class RegisteredUserController extends Controller
                 'name' => $request->first_name . " " . $request->last_name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-            ]);
-    
-            UserProfile::create([
-                'users_id' => $user->id,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'middle_name' => $request->middle_name,
@@ -53,6 +49,11 @@ class RegisteredUserController extends Controller
                 'gender' => $request->gender,
                 'address' => $request->address,
                 'phone' => $request->phone,
+            ]);
+    
+            UserProfile::create([
+                'users_id' => $user->id,
+                
             ]);
     
             event(new Registered($user));
@@ -67,15 +68,15 @@ class RegisteredUserController extends Controller
             return response()->json(['message'=>'Error', 'error' => $e->getMessage()], 500);
         }
        
-    }
+    } 
     public function update(Request $request)
     {
         $user = Auth::user();
-
+    
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-
+    
         // Validate request data
         $validatedData = $request->validate([
             'first_name' => 'nullable|string|max:255',
@@ -84,28 +85,32 @@ class RegisteredUserController extends Controller
             'age' => 'nullable|integer|min:0|max:255',
             'gender' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:255',
+            'bio' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'province' => 'nullable|string|max:255',
             'phone' => 'nullable|string|min:11|max:11',
         ]);
-
+    
         DB::beginTransaction();
         try {
-            // Update or create user profile
-            $userProfile = UserProfile::updateOrCreate(
-                ['users_id' => $user->id],  // Find by user ID
-                $validatedData             // Update fields
-            );
-
+            // Concatenate first_name and last_name for the name column
+            $validatedData['name'] = trim(($validatedData['first_name'] ?? $user->first_name) . ' ' . ($validatedData['last_name'] ?? $user->last_name));
+    
+            // Update user record directly
+            $user->update($validatedData);
+    
             DB::commit();
-
+    
             return response()->json([
                 'message' => 'Profile updated successfully',
-                'profile' => $userProfile
+                'user' => $user
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Error updating profile', 'error' => $e->getMessage()], 500);
         }
     }
+    
 
 
 

@@ -22,11 +22,17 @@ class SocialAuthenticationController extends Controller
         try {
             $socialUser = Socialite::driver($provider)->stateless()->user();
     
+
+            $nameParts = explode(' ', $socialUser->name, 2);
+            $firstName = $nameParts[0] ?? null;
+            $lastName = $nameParts[1] ?? null;
             // Find or create user
             $user = User::updateOrCreate([
                 'email' => $socialUser->email, // Ensure the email check to avoid duplicates
             ], [
                 'name' => $socialUser->name,
+                'first_name' => $firstName,
+                'last_name' => $lastName,
                 'auth_provider_id' => $socialUser->id,
                 'auth_provider' => $provider,
                 'email_verified_at' => $socialUser->email_verified ? now() : null,

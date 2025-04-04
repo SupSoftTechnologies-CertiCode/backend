@@ -17,6 +17,22 @@ return new class extends Migration
             $table->string('name', 255);
             $table->string('email', 255)->unique();
             $table->string('role', 50)->default('user');
+
+
+            $table->string('first_name', 255)->nullable();
+            $table->string('last_name', 255)->nullable();
+            $table->string('middle_name', 255)->nullable();
+            $table->integer('age')->nullable();
+            $table->string('gender', 50)->nullable();
+            $table->string('phone', 11)->nullable();
+            $table->string('bio', 255)->nullable();
+
+
+            $table->string('address', 255)->nullable();
+            $table->string('country', 255)->nullable();
+            $table->string('province', 255)->nullable();
+
+
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password', 255)->nullable();
             $table->string('auth_provider', 50)->nullable();
@@ -29,13 +45,7 @@ return new class extends Migration
         Schema::create('users_profile', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('users_id');
-            $table->string('first_name', 255)->nullable();
-            $table->string('last_name', 255)->nullable();
-            $table->string('middle_name', 255)->nullable();
-            $table->integer('age')->nullable();
-            $table->string('gender', 50)->nullable();
-            $table->string('address', 255)->nullable();
-            $table->string('phone', 11)->nullable();
+            
             $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
         });
