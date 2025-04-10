@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\UserProfile;
 use Exception;
 use Laravel\Socialite\Facades\Socialite;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -38,11 +37,7 @@ class SocialAuthenticationController extends Controller
                 'email_verified_at' => $socialUser->email_verified ? now() : null,
             ]);
     
-            // Ensure user profile exists
-            UserProfile::firstOrCreate([
-                'users_id' => $user->id,
-            ]);
-    
+
             // Generate JWT token
             $token = JWTAuth::fromUser($user);
     

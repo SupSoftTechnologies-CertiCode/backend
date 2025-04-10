@@ -26,12 +26,16 @@ return new class extends Migration
             $table->string('gender', 50)->nullable();
             $table->string('phone', 11)->nullable();
             $table->string('bio', 255)->nullable();
-
+ 
 
             $table->string('address', 255)->nullable();
             $table->string('country', 255)->nullable();
             $table->string('province', 255)->nullable();
 
+            // $table->string('facebook', 255)->nullable();
+            // $table->string('xcom', 255)->nullable();
+            // $table->string('linkedin', 255)->nullable();
+            // $table->string('instagram', 255)->nullable();
 
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password', 255)->nullable();
@@ -42,13 +46,13 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('users_profile', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('users_id');
+        // Schema::create('users_profile', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->unsignedBigInteger('users_id');
             
-            $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->timestamps();
-        });
+        //     $table->foreign('users_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
+        //     $table->timestamps();
+        // });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
@@ -72,7 +76,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
-        Schema::dropIfExists('users_profile');
+        // Schema::dropIfExists('users_profile');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }

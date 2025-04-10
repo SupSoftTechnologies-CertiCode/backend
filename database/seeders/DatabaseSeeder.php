@@ -176,25 +176,25 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'admin@gmail.com',
             'role' => 'admin',
-            'first_name' => "",
-            'last_name' => "",
+            'first_name' => "hi",
+            'last_name' => "hi",
             'middle_name' => null,
             'age' => 0,
-            'gender' => "",
-            'address' => "",
-            'country' => "",
-            'province' => "",
-            'bio' => "",
-            'phone' => "",
+            'gender' => "hi",
+            'address' => "hi",
+            'country' => "hi",
+            'province' => "hi",
+            'bio' => "hi",
+            'phone' => "09123456789",
             'password' => Hash::make('admin123'),
             'email_verified_at' => now()
         ]);
 
-        UserProfile::create([
-            'users_id' => 1,
+        // UserProfile::create([
+        //     'users_id' => 1,
             
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
+        //     'created_at' => now(),
+        //     'updated_at' => now()
+        // ]);
     }
 }

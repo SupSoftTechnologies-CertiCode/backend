@@ -111,7 +111,7 @@ class VerifyEmailController extends Controller
 
         $user = User::find($id);
 
-        $current_user = UserProfile::with(['users'])->where('users_id', $id)->first();
+        $current_user = $user;
 
         if (!$user) {
             Log::error('User not found', ['id' => $id]);

@@ -33,6 +33,10 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'province',
         'bio',
         'phone',
+        // 'facebook',
+        // 'xcom',
+        // 'linkedin',
+        // 'instagram',
         'email_verified_at',
         'password',
         'auth_provider',
@@ -66,10 +70,10 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         ];
     }
 
-    public function userProfile()
-    {
-        return $this->hasOne(UserProfile::class, 'users_id', 'id');
-    }
+    // public function userProfile()
+    // {
+    //     return $this->hasOne(UserProfile::class, 'users_id', 'id');
+    // }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.

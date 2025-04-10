@@ -64,13 +64,14 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
-        $current_user = UserProfile::with(['users'])->where('users_id', auth()->user()->id)->first();
+        $current_user = User::find(auth()->user()->id);
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
-            'isVerified' => !is_null(auth()->user()->email_verified_at), 
+            'isVerified' => !is_null(auth()->user()->email_verified_at),
             'current_user' => $current_user
         ]);
     }
+
 }

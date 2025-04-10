@@ -51,10 +51,10 @@ class RegisteredUserController extends Controller
                 'phone' => $request->phone,
             ]);
     
-            UserProfile::create([
-                'users_id' => $user->id,
+            // UserProfile::create([
+            //     'users_id' => $user->id,
                 
-            ]);
+            // ]);
     
             event(new Registered($user));
     
@@ -69,6 +69,10 @@ class RegisteredUserController extends Controller
         }
        
     } 
+
+
+
+    
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -89,7 +93,11 @@ class RegisteredUserController extends Controller
             'country' => 'nullable|string|max:255',
             'province' => 'nullable|string|max:255',
             'phone' => 'nullable|string|min:11|max:11',
-        ]);
+            'facebook' => 'nullable|string|max:255',
+            'xcom' => 'nullable|string|max:255',
+            'linkedin' => 'nullable|string|max:255',
+            'instagram' => 'nullable|string|max:255',
+        ]); 
     
         DB::beginTransaction();
         try {
