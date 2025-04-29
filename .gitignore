@@ -3,7 +3,8 @@
 /public/build
 /public/hot
 /public/storage
-
+/storage/*.key
+/storage/pail
 /vendor
 
 
@@ -25,5 +26,5 @@ yarn-error.log
 # Allow images and files inside public and storage
 !public/
 !public/**/*
-!storage/
-!storage/**/*
+# !storage/
+# !storage/**/*
