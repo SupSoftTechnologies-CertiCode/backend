@@ -74,8 +74,7 @@ Route::controller(SocialAuthenticationController::class)->group(function () {
 });
 
 Route::get('/certificate/{id}', [ParticipantController::class, 'generateCertificate']);
-Route::get('/participants', [ParticipantController::class, 'index']);
-Route::get('/add-participant', [ParticipantController::class, 'store']);
+
 
 
 Route::get('/templates', [CertificateTemplateController::class, 'index']);
