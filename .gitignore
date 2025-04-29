@@ -24,7 +24,7 @@ yarn-error.log
 
 
 # Allow images and files inside public and storage
-!public/
-!public/**/*
+# !public/
+# !public/**/*
 # !storage/
 # !storage/**/*
