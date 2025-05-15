@@ -156,4 +156,10 @@ class ParticipantController extends Controller
         $participants = Participant::with(['user', 'guest', 'seminar'])->get()->makeHidden(['seminar_id', 'user_id', 'guest_id']);
         return response()->json($participants);
     }
+
+    public function show($id)
+    {
+        $participant = Participant::with(['user', 'guest', 'seminar'])->findOrFail($id);
+        return response()->json($participant->makeHidden(['seminar_id', 'user_id', 'guest_id']));
+    }
 }

@@ -8,7 +8,7 @@ class CertificateTemplate extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['id','name', 'pdf_filename'];
+    protected $fillable = ['id', 'name', 'pdf_filename', 'json_layout'];
 
     // Relationship with Seminars
     public function seminars()

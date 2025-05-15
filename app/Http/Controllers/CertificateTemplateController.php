@@ -10,21 +10,24 @@ use Illuminate\Support\Facades\File;
 class CertificateTemplateController extends Controller
 {
 
-    // 🔹 Archive a certificate template
 
 
-    // 🔹 Get all certificate templates
     public function index()
     {
         return response()->json(CertificateTemplate::all());
     }
 
-    // 🔹 Upload a new certificate template
+    public function show($id)
+    {
+        $template = CertificateTemplate::findOrFail($id);
+        return response()->json($template);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'pdf_file' => 'required|mimes:pdf|max:2048',
+            'pdf_file' => 'required|mimes:pdf|max:10240',
         ]);
 
         $filePath = null;
@@ -37,59 +40,141 @@ class CertificateTemplateController extends Controller
         // $filename = time() . '_' . $file->getClientOriginalName();
         // $file->move(public_path('certificates'), $filename);
 
-        // Save to the database
         $template = CertificateTemplate::create([
-            'name' => $request->name, // Store name
+            'name' => $request->name,
             'pdf_filename' => $filePath,
         ]);
 
         return response()->json(['message' => 'Template uploaded successfully', 'template' => $template]);
     }
 
-    // 🔹 Update an existing template (Replace old PDF & Name)
     public function update(Request $request, $id)
     {
         $template = CertificateTemplate::findOrFail($id);
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'pdf_file' => 'nullable|mimes:pdf|max:2048',
+            'pdf_file' => 'nullable|mimes:pdf|max:10240',
         ]);
 
-        // If a new file is uploaded, delete old file & replace
         if ($request->hasFile('pdf_file')) {
-            $oldFilePath = public_path('certificates/' . $template->pdf_filename);
-            if (File::exists($oldFilePath)) {
-                File::delete($oldFilePath);
+            if ($template->pdf_filename) {
+                $oldPath = storage_path('app/public/' . $template->pdf_filename);
+                if (File::exists($oldPath)) {
+                    File::delete($oldPath);
+                }
             }
 
-            $file = $request->file('pdf_file');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('certificates'), $filename);
-            $template->pdf_filename = $filename;
+            $filePath = $request->file('pdf_file')->store('certificates', 'public');
+            $template->pdf_filename = $filePath;
         }
 
-        // Update name
         $template->name = $request->name;
         $template->save();
 
         return response()->json(['message' => 'Template updated successfully', 'template' => $template]);
     }
 
-    // 🔹 Delete a certificate template
     public function destroy($id)
     {
         $template = CertificateTemplate::findOrFail($id);
 
-        // Delete file from storage
-        $filePath = public_path('certificates/' . $template->pdf_filename);
-        if (File::exists($filePath)) {
-            File::delete($filePath);
+        if ($template->pdf_filename) {
+            $filePath = storage_path('app/public/' . $template->pdf_filename);
+            if (File::exists($filePath)) {
+                File::delete($filePath);
+            }
         }
 
-        // Delete from database
         $template->delete();
 
         return response()->json(['message' => 'Template deleted successfully']);
     }
+
+    public function viewTemplate($filename)
+    {
+        $path = storage_path('app/public/certificates/' . $filename);
+
+        if (!File::exists($path)) {
+            return response()->json(['error' => 'File not found'], 404);
+        }
+
+        $frontendUrl = 'http://localhost:5173';
+
+        $fileContent = file_get_contents($path);
+        $fileSize = filesize($path);
+
+        $headers = [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            'Content-Length' => $fileSize,
+            'Access-Control-Allow-Origin' => $frontendUrl,
+            'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+            'Access-Control-Allow-Headers' => 'Origin, Content-Type, Accept',
+            'Access-Control-Allow-Credentials' => 'true',
+        ];
+
+        return response()->stream(
+            function() use ($fileContent) {
+                echo $fileContent;
+            },
+            200,
+            $headers
+        );
+    }
+
+
+
+    public function saveJsonLayout(Request $request, $id)
+    {
+        $request->validate([
+            'json_layout' => 'required|json',
+        ]);
+
+        $template = CertificateTemplate::findOrFail($id);
+        $template->json_layout = $request->json_layout;
+        $template->save();
+
+        return response()->json(['message' => 'JSON layout saved successfully']);
+    }
+
+    public function proxyImage(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|url',
+        ]);
+
+        $url = $request->input('url');
+
+        try {
+            $imageContent = file_get_contents($url);
+
+            if ($imageContent === false) {
+                return response()->json(['error' => 'Failed to fetch image'], 404);
+            }
+
+            $contentType = 'image/jpeg';
+
+            $headers = get_headers($url, 1);
+            if (isset($headers['Content-Type'])) {
+                $contentType = is_array($headers['Content-Type'])
+                    ? $headers['Content-Type'][0]
+                    : $headers['Content-Type'];
+            }
+
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+
+            return response($imageContent, 200, [
+                'Content-Type' => $contentType,
+                'Access-Control-Allow-Origin' => $frontendUrl,
+                'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+                'Access-Control-Allow-Headers' => 'Origin, Content-Type, Accept',
+                'Access-Control-Allow-Credentials' => 'true',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to proxy image: ' . $e->getMessage()], 500);
+        }
+    }
+
+
 }
