@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('FRONTEND_URL'), 'https://backend.certicode.tech/sanctum/csrf-cookie', 'certicode.tech'],
+    'allowed_origins' => [env('FRONTEND_URL'), 'https://backend.certicode.tech/sanctum/csrf-cookie', 'https://certicode.tech'],
 
     'allowed_origins_patterns' => [],
 
