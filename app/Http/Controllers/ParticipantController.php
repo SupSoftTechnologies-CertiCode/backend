@@ -14,12 +14,10 @@ use Illuminate\Support\Facades\Log;
 use setasign\Fpdi\Fpdi;
 use App\Mail\CertificateMail;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use TCPDF;
 class ParticipantController extends Controller
 {
-    public function generateCertificate($participantId)
+    public function generateCertificate(Request $request, $participantId)
     {
         try {
             // 🔹 Fetch participant details
@@ -36,20 +34,6 @@ class ParticipantController extends Controller
                 return response()->json(['error' => 'No associated user or guest'], 400);
             }
 
-            // 🔹 Fetch assigned certificate template
-            $template = CertificateTemplate::find($participant->seminar->certificate_template_id);
-
-            if (!$template) {
-                return response()->json(['error' => 'Certificate template not found'], 404);
-            }
-
-            // 🔹 Get the path of the stored PDF template (from Storage)
-            $templatePath = Storage::disk('public')->path($template->pdf_filename);
-            Log::info($templatePath);
-            if (!File::exists($templatePath)) {
-                return response()->json(['error' => 'Template file not found'], 404);
-            }
-
             // 🔹 Ensure the 'generated' directory exists in storage
             $generatedDir = Storage::path('generated');
             if (!File::exists($generatedDir)) {
@@ -60,38 +44,65 @@ class ParticipantController extends Controller
             $certificateFileName = "certificate_" . trim($participantId) . ".pdf";
             $certificatePath = Storage::path("generated/{$certificateFileName}");
 
-            // 🔹 Generate Certificate using FPDI
-            $pdf = new Fpdi();
-            $pdf->AddPage('L', 'A4');
-            $pdf->setSourceFile($templatePath);
-            $tplIdx = $pdf->importPage(1);
-            $pdf->useTemplate($tplIdx);
+            // 🔹 Check if we should use the HTML-generated certificate from the frontend
+            if ($request->isMethod('post') && $request->has('use_html_method') && $request->input('use_html_method') && $request->has('pdf_blob')) {
+                // Use the PDF blob sent from the frontend
+                $pdfBlob = base64_decode($request->input('pdf_blob'));
 
-            // 🔹 Set Larger Font for Name
-            $pdf->SetFont('Times', 'BI', 50);
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetXY(20, 110);
-            $pdf->Cell(0, 10, $name, 0, 1, 'C');
+                // Save the PDF blob to the file system
+                file_put_contents($certificatePath, $pdfBlob);
 
-            // 🔹 Set Normal Font for Other Details
-            $pdf->SetFont('Arial', '', 16);
-            $pdf->SetXY(138, 130);
-            $pdf->Cell(0, 10, $participant->seminar->name_of_seminar, 0, 1, 'C');
+                Log::info("Using HTML-generated certificate for participant {$participantId}");
+            } else {
+                // 🔹 Fetch assigned certificate template for backend generation
+                $template = CertificateTemplate::find($participant->seminar->certificate_template_id);
 
-            $pdf->SetXY(98, 143);
-            $pdf->Cell(0, 10, $participant->seminar->topics, 0, 1, 'L');
+                if (!$template) {
+                    return response()->json(['error' => 'Certificate template not found'], 404);
+                }
 
-            $pdf->SetXY(0, 158);
-            $pdf->Cell(0, 10, $participant->seminar->location, 0, 1, 'C');
+                // 🔹 Get the path of the stored PDF template (from Storage)
+                $templatePath = Storage::disk('public')->path($template->pdf_filename);
+                Log::info($templatePath);
+                if (!File::exists($templatePath)) {
+                    return response()->json(['error' => 'Template file not found'], 404);
+                }
 
-            $pdf->SetXY(45, 179);
-            $pdf->Cell(0, 10, date('F d, Y', strtotime($participant->seminar->date)), 0, 1, 'L');
+                // 🔹 Generate Certificate using FPDI (backend method)
+                $pdf = new Fpdi();
+                $pdf->AddPage('L', 'A4');
+                $pdf->setSourceFile($templatePath);
+                $tplIdx = $pdf->importPage(1);
+                $pdf->useTemplate($tplIdx);
 
-            $pdf->SetXY(199, 191);
-            $pdf->Cell(45, 5, $participant->seminar->speaker_name, 0, 1, 'C');
+                // 🔹 Set Larger Font for Name
+                $pdf->SetFont('Times', 'BI', 50);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->SetXY(20, 110);
+                $pdf->Cell(0, 10, $name, 0, 1, 'C');
 
-            // 🔹 Save the generated certificate in Storage
-            $pdf->Output($certificatePath, 'F');
+                // 🔹 Set Normal Font for Other Details
+                $pdf->SetFont('Arial', '', 16);
+                $pdf->SetXY(138, 130);
+                $pdf->Cell(0, 10, $participant->seminar->name_of_seminar, 0, 1, 'C');
+
+                $pdf->SetXY(98, 143);
+                $pdf->Cell(0, 10, $participant->seminar->topics, 0, 1, 'L');
+
+                $pdf->SetXY(0, 158);
+                $pdf->Cell(0, 10, $participant->seminar->location, 0, 1, 'C');
+
+                $pdf->SetXY(45, 179);
+                $pdf->Cell(0, 10, date('F d, Y', strtotime($participant->seminar->date)), 0, 1, 'L');
+
+                $pdf->SetXY(199, 191);
+                $pdf->Cell(45, 5, $participant->seminar->speaker_name, 0, 1, 'C');
+
+                // 🔹 Save the generated certificate in Storage
+                $pdf->Output($certificatePath, 'F');
+
+                Log::info("Using backend-generated certificate for participant {$participantId}");
+            }
 
             // 🔹 Prepare email data
             $data = [
@@ -109,6 +120,7 @@ class ParticipantController extends Controller
 
             return response()->json(['message' => 'Certificate sent successfully to ' . $email]);
         } catch (\Exception $e) {
+            Log::error('Certificate generation error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to send certificate: ' . $e->getMessage()], 500);
         }
     }
@@ -122,17 +134,17 @@ class ParticipantController extends Controller
             'user_id' => 'nullable|exists:users,id',
             'transaction_id' => 'nullable|exists:transactions,id', // Accepts transaction_id
         ]);
-    
+
         // Determine if the seminar is free (i.e., no payment required)
         $isFreeSeminar = $request->input('payment_status') === 'completed' || $request->input('payment_status') === 'free';
-    
+
         // Create the participant record
         $participant = Participant::create([
             'seminar_id' => $request->seminar_id,
             'user_id' => $request->user_id ?? null,
             'guest_id' => $request->guest_id ?? null,
         ]);
-    
+
         // **If it's a paid seminar, update the transaction**
         if (!$isFreeSeminar && $request->transaction_id) {
             $transaction = Transaction::find($request->transaction_id);
@@ -141,19 +153,25 @@ class ParticipantController extends Controller
                 $transaction->save();
             }
         }
-    
+
         return response()->json([
             'message' => 'Successfully joined the seminar!',
             'participant' => $participant,
         ], 201);
     }
-    
 
-    
+
+
 
     public function index()
     {
         $participants = Participant::with(['user', 'guest', 'seminar'])->get()->makeHidden(['seminar_id', 'user_id', 'guest_id']);
         return response()->json($participants);
+    }
+
+    public function show($id)
+    {
+        $participant = Participant::with(['user', 'guest', 'seminar'])->findOrFail($id);
+        return response()->json($participant->makeHidden(['seminar_id', 'user_id', 'guest_id']));
     }
 }

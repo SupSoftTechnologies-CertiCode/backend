@@ -12,13 +12,29 @@ class SocialAuthenticationController extends Controller
 {
 
     public function authProvideRedirection($provider) {        
-        if($provider) {         
+        if($provider) {
+            // Disable SSL verification for local development
+            if (env('APP_ENV') === 'local') {
+                $guzzle = new \GuzzleHttp\Client([
+                    'verify' => false
+                ]);
+                Socialite::driver($provider)->setHttpClient($guzzle);
+            }
+            
             return Socialite::driver($provider)->redirect();        
         }     
     }
 
     public function socialAuthentication($provider) {
         try {
+            // Disable SSL verification for local development
+            if (env('APP_ENV') === 'local') {
+                $guzzle = new \GuzzleHttp\Client([
+                    'verify' => false
+                ]);
+                Socialite::driver($provider)->setHttpClient($guzzle);
+            }
+            
             $socialUser = Socialite::driver($provider)->stateless()->user();
     
 
@@ -41,10 +57,8 @@ class SocialAuthenticationController extends Controller
             // Generate JWT token
             $token = JWTAuth::fromUser($user);
     
-            // Redirect to frontend with token
-            $redirectUrl = env('FRONTEND_URL') . "/social-auth-handler?token=" . $token;
-    
-            return redirect($redirectUrl);
+            // Redirect to frontend handler - OAuth requires browser redirect, not JSON response
+            return redirect(env('FRONTEND_URL') . '/social-auth-handler?token=' . $token);
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',

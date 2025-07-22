@@ -15,7 +15,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 
-use App\Http\Middleware\JwtMiddleware; 
+use App\Http\Middleware\JwtMiddleware;
 use Illuminate\Support\Facades\Cache;
 
 Route::prefix('auth')->middleware([JwtMiddleware::class])->group(function () {
@@ -74,14 +74,42 @@ Route::controller(SocialAuthenticationController::class)->group(function () {
 });
 
 Route::get('/certificate/{id}', [ParticipantController::class, 'generateCertificate']);
+Route::post('/certificate/{id}', [ParticipantController::class, 'generateCertificate']);
 Route::get('/participants', [ParticipantController::class, 'index']);
+Route::get('/participants/{id}', [ParticipantController::class, 'show']);
 Route::get('/add-participant', [ParticipantController::class, 'store']);
 
 
 Route::get('/templates', [CertificateTemplateController::class, 'index']);
+Route::get('/templates/{id}', [CertificateTemplateController::class, 'show']);
 Route::post('/templates', [CertificateTemplateController::class, 'store']);
 Route::post('/templates/{id}', [CertificateTemplateController::class, 'update']);
 Route::delete('/templates/{id}', [CertificateTemplateController::class, 'destroy']);
+Route::get('/view-template/{filename}', [CertificateTemplateController::class, 'viewTemplate']);
+Route::options('/view-template/{filename}', function() {
+    $frontendUrl = 'http://localhost:5173';
+    return response()->json([], 200, [
+        'Access-Control-Allow-Origin' => $frontendUrl,
+        'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+        'Access-Control-Allow-Headers' => 'Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials' => 'true',
+    ]);
+});
+
+
+
+Route::post('/templates/{id}/layout', [CertificateTemplateController::class, 'saveJsonLayout']);
+
+Route::get('/proxy-image', [CertificateTemplateController::class, 'proxyImage']);
+Route::options('/proxy-image', function() {
+    $frontendUrl = 'http://localhost:5173';
+    return response()->json([], 200, [
+        'Access-Control-Allow-Origin' => $frontendUrl,
+        'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+        'Access-Control-Allow-Headers' => 'Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials' => 'true',
+    ]);
+});
 
 
 Route::put('/transactions/{id}/update', [TransactionController::class, 'update']);
