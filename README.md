@@ -68,3 +68,12 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Database Migrations
+
+1. Upload migration to GitHub branch
+2. Open a terminal
+3. Enter the following credentials: ```ssh -p 65002 u850020960@153.92.10.98```
+4. Enter password: ```YkJN5quxx!aN!Qg```
+5. Navigate to the backend files using the command: ```cd domains/certicode.tech/public_html/__backend```
+6. Run ```php artisan migrate```
