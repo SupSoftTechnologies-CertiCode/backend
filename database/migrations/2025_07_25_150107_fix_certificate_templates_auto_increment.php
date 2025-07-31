@@ -12,8 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Fix the id column to have proper auto-increment (without redefining PRIMARY KEY)
-        DB::statement('ALTER TABLE certificate_templates MODIFY id BIGINT UNSIGNED AUTO_INCREMENT');
+        // Check if table exists and fix the id column to have proper auto-increment
+        if (Schema::hasTable('certificate_templates')) {
+            DB::statement('ALTER TABLE certificate_templates MODIFY id BIGINT UNSIGNED AUTO_INCREMENT');
+        }
     }
 
     /**
