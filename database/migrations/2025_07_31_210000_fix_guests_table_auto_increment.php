@@ -14,17 +14,17 @@ return new class extends Migration
     {
         // Fix the guests table id column to have proper auto-increment
         if (Schema::hasTable('guests')) {
-            DB::statement('ALTER TABLE guests MODIFY id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY');
+            DB::statement('ALTER TABLE guests MODIFY id BIGINT UNSIGNED AUTO_INCREMENT');
         }
         
         // Fix the participants table id column to have proper auto-increment
         if (Schema::hasTable('participants')) {
-            DB::statement('ALTER TABLE participants MODIFY id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY');
+            DB::statement('ALTER TABLE participants MODIFY id BIGINT UNSIGNED AUTO_INCREMENT');
         }
         
         // Fix the seminars table id column to have proper auto-increment
         if (Schema::hasTable('seminars')) {
-            DB::statement('ALTER TABLE seminars MODIFY id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY');
+            DB::statement('ALTER TABLE seminars MODIFY id BIGINT UNSIGNED AUTO_INCREMENT');
         }
     }
 
