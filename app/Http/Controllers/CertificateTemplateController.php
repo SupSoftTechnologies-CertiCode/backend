@@ -14,7 +14,13 @@ class CertificateTemplateController extends Controller
 
     public function index()
     {
-        return response()->json(CertificateTemplate::all());
+        try {
+            $templates = CertificateTemplate::all();
+            return response()->json($templates);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching certificate templates: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch templates'], 500);
+        }
     }
 
     public function show($id)

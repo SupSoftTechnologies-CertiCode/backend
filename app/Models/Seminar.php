@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Seminar extends Model
 {
     protected $fillable = [
-        'id',
         'name_of_seminar',
         'topics',
         'description',
@@ -25,6 +24,11 @@ class Seminar extends Model
     public function participants()
     {
         return $this->hasMany(Participant::class);
+    }
+
+    public function certificateTemplate()
+    {
+        return $this->belongsTo(CertificateTemplate::class);
     }
     
 }

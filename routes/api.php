@@ -96,6 +96,17 @@ Route::options('/view-template/{filename}', function() {
     ]);
 });
 
+Route::get('/view-image/{path}', [SeminarController::class, 'viewImage'])->where('path', '.*');
+Route::options('/view-image/{path}', function() {
+    $frontendUrl = 'http://localhost:5173';
+    return response()->json([], 200, [
+        'Access-Control-Allow-Origin' => $frontendUrl,
+        'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+        'Access-Control-Allow-Headers' => 'Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials' => 'true',
+    ]);
+})->where('path', '.*');
+
 
 
 Route::post('/templates/{id}/layout', [CertificateTemplateController::class, 'saveJsonLayout']);

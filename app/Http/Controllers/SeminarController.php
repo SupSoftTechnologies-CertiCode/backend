@@ -7,6 +7,7 @@ use App\Models\Seminar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class SeminarController extends Controller
 {
@@ -157,5 +158,37 @@ class SeminarController extends Controller
             'message' => 'Seminar Deleted.',
             'seminar' => $seminar
         ], 200);
+    }
+
+    public function viewImage($path)
+    {
+        $fullPath = storage_path('app/public/' . $path);
+
+        if (!File::exists($fullPath)) {
+            return response()->json(['error' => 'Image not found'], 404);
+        }
+
+        $frontendUrl = 'http://localhost:5173';
+
+        $fileContent = file_get_contents($fullPath);
+        $fileSize = filesize($fullPath);
+        $mimeType = mime_content_type($fullPath) ?: 'image/jpeg';
+
+        $headers = [
+            'Content-Type' => $mimeType,
+            'Content-Length' => $fileSize,
+            'Access-Control-Allow-Origin' => $frontendUrl,
+            'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+            'Access-Control-Allow-Headers' => 'Origin, Content-Type, Accept',
+            'Access-Control-Allow-Credentials' => 'true',
+        ];
+
+        return response()->stream(
+            function() use ($fileContent) {
+                echo $fileContent;
+            },
+            200,
+            $headers
+        );
     }
 }
